@@ -33,7 +33,10 @@ const Button: React.FC<ButtonProps> = ({
       onClick={onClick}
       className={`${baseStyles} ${sizeStyles} ${fullWidthStyles} ${variantStyles[variant]} ${
         disabled ? "opacity-50 cursor-not-allowed" : ""
-      }`}
+      } g-recaptcha`}
+      data-sitekey="6LdYhqcpAAAAAID55_bHoE0R8pTRHF1acH2yA4KM" // Aquí va tu clave de sitio de reCAPTCHA
+      data-callback='onFormSubmit'
+      data-action='submit'
     >
       {children}
     </button>
@@ -41,3 +44,4 @@ const Button: React.FC<ButtonProps> = ({
 };
 
 export default Button;
+
