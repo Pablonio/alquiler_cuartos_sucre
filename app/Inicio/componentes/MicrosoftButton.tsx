@@ -26,11 +26,7 @@ const MicrosoftButton: React.FC<MicrosoftButtonProps> = ({ onClick }) => {
         hover:bg-blue-50  // Cambio de color al hacer hover
         focus:outline-offset-0
         transition duration-300 ease-in-out  // Agregando transición
-        g-recaptcha
       "
-      data-sitekey="6LdYhqcpAAAAAID55_bHoE0R8pTRHF1acH2yA4KM" // Aquí va tu clave de sitio de reCAPTCHA
-      data-callback='onMicrosoftSubmit'
-      data-action='submit'
     >
       <RiMicrosoftLine />
     </button>

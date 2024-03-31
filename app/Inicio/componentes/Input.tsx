@@ -1,9 +1,10 @@
+// Input.tsx
 import React from 'react';
 
 interface InputProps {
   id: string;
   label?: string;
-  type?: 'text' | 'email' | 'password';
+  type?: 'text' | 'email' | 'password' | 'file' | 'date';
   placeholder?: string;
   required?: boolean;
   disabled?: boolean;
@@ -41,7 +42,7 @@ const Input: React.FC<InputProps> = ({
           disabled={disabled}
           placeholder={placeholder}
           onChange={onChange}
-          value={value}
+          value={value} // Establecer el valor del input
           className={`shadow-sm focus:ring-indigo-500 focus:border-indigo-500 block w-full sm:text-sm border-gray-300 rounded-md ${
             errors && errors[id] ? 'border-red-500' : ''
           }`}

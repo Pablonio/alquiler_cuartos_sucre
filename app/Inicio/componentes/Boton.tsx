@@ -9,7 +9,7 @@ interface ButtonProps {
   variant?: "primary" | "secondary";
 }
 
-const Button: React.FC<ButtonProps> = ({
+const Boton: React.FC<ButtonProps> = ({
   children,
   onClick,
   type = "button",
@@ -26,22 +26,24 @@ const Button: React.FC<ButtonProps> = ({
     secondary: "text-indigo-700 bg-indigo-100 hover:bg-indigo-200 border-transparent",
   };
 
+  const handleClick = () => {
+    if (onClick) {
+      onClick();
+    }
+  };
+
   return (
     <button
       type={type}
       disabled={disabled}
-      onClick={onClick}
+      onClick={handleClick}
       className={`${baseStyles} ${sizeStyles} ${fullWidthStyles} ${variantStyles[variant]} ${
         disabled ? "opacity-50 cursor-not-allowed" : ""
-      } g-recaptcha`}
-      data-sitekey="6LdYhqcpAAAAAID55_bHoE0R8pTRHF1acH2yA4KM" // Aquí va tu clave de sitio de reCAPTCHA
-      data-callback='onFormSubmit'
-      data-action='submit'
+      }`}
     >
       {children}
     </button>
   );
 };
 
-export default Button;
-
+export default Boton;
