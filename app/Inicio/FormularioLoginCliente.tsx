@@ -1,4 +1,5 @@
 'use client'
+import { useRouter } from "next/navigation";
 import React, { useState, useCallback, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import axios from 'axios';
@@ -11,6 +12,7 @@ import { toast } from 'react-hot-toast';
 import AzureADModal from './componentes/modalAzure-ad';
 import GoogleModal from './componentes/modalGoogle';
 
+
 type Variant = 'LOGIN' | 'REGISTER';
 
 const AuthForm = () => {
@@ -20,6 +22,7 @@ const AuthForm = () => {
   const [showModalMicrosoft, setShowModalMicrosoft] = useState(false);
   const [showModalGoogle, setShowModalGoogle] = useState(false);
   const [fotoUrl, setFotoUrl] = useState<string>('');
+  const router = useRouter();
 
   const handleSignIn = async (provider: 'google' | 'azure-ad') => {
     setIsLoading(true);
@@ -75,6 +78,35 @@ const AuthForm = () => {
           toast.error('Something went wrong!');
         })
         .finally(() => setIsLoading(false));
+    } else {
+      // Iniciar sesión
+      axios
+        .post('/api/inicio', { email: data.email, contrasena: data.contrasena })
+        .then((response) => {
+          const rol = response.data.rol;
+          switch (rol) {
+            case 'USUARIO':
+              router.push('/InicioUsuario')
+              break;
+            case 'PROPIETARIO':
+              router.push('/InicioPropietario');
+              break;
+            case 'ADMIN':
+              router.push('/InicioAdmin');
+              break;
+            case 'BANEADO':
+              router.push('/InicioBaneado');
+              break;
+            default:
+              router.push('/');
+              break;
+          }
+        })
+        .catch((error) => {
+          console.error('Error logging in:', error);
+          toast.error('Something went wrong!');
+        })
+        .finally(() => setIsLoading(false));
     }
   };
 
@@ -82,13 +114,44 @@ const AuthForm = () => {
     setVariant((prevVariant) => (prevVariant === 'LOGIN' ? 'REGISTER' : 'LOGIN'));
   }, []);
 
+
+  const verifyUserExists = async () => {
+    try {
+      const response = await axios.post('/api/inicioprov', { email: session?.data?.user?.email });
+      const rol = response.data.rol;
+      switch (rol) {
+        case 'USUARIO':
+          router.push('/InicioUsuario')
+          break;
+        case 'PROPIETARIO':
+          router.push('/InicioPropietario');
+          break;
+        case 'ADMIN':
+          router.push('/InicioAdmin');
+          break;
+        case 'BANEADO':
+          router.push('/InicioBaneado');
+          break;
+        default:
+          router.push('/');
+          break;
+      }
+      setShowModalGoogle(false);
+      setShowModalMicrosoft(false);
+    } catch (error) {
+      if (session?.status === 'authenticated') {
+        if (session?.data?.user?.image) {
+          setShowModalGoogle(true);
+        } else {
+          setShowModalMicrosoft(true);
+        }
+      }
+    }
+  };
+
   useEffect(() => {
     if (session?.status === 'authenticated') {
-      if (session?.data?.user?.image === '') {
-        setShowModalMicrosoft(true);
-      } else {
-        setShowModalGoogle(true);
-      }
+      verifyUserExists();
     }
   }, [session]);
 
