@@ -1,4 +1,5 @@
 'use client'
+'use client';
 import React, { useState, useEffect } from "react";
 import Input from "./Input";
 import Boton from "./Boton";
@@ -14,19 +15,18 @@ interface Props {
 interface FormData {
   nombre: string;
   email: string;
-  contrasena?: string;
-  telefono?: string;
-  direccion?: string;
-  ciudad?: string;
-  fechaNacimiento?: string;
-  ci?: string;
-  fotoUrl?: string;
+  contrasena: string;
+  telefono: string;
+  direccion: string;
+  ciudad: string;
+  fechaNacimiento: string;
+  ci: string;
+  fotoUrl: string;
 }
 
 const AzureADModal: React.FC<Props> = ({ register, errors, onClose }) => {
   const { data: session } = useSession();
 
-  // Inicializa el estado local con los datos de sesión
   const [formData, setFormData] = useState<FormData>({
     nombre: session?.user?.name || '',
     email: session?.user?.email || '',
@@ -40,8 +40,7 @@ const AzureADModal: React.FC<Props> = ({ register, errors, onClose }) => {
   });
 
   useEffect(() => {
-    // Actualiza los datos del formulario cuando cambian los datos de sesión
-    setFormData((prevData) => ({
+    setFormData(prevData => ({
       ...prevData,
       nombre: session?.user?.name || '',
       email: session?.user?.email || '',
@@ -49,121 +48,126 @@ const AzureADModal: React.FC<Props> = ({ register, errors, onClose }) => {
   }, [session]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.id]: e.target.value });
+    const { id, value } = e.target;
+    setFormData(prevData => ({
+      ...prevData,
+      [id]: value,
+    }));
   };
 
   const handleSubmit = () => {
     axios
       .post('/api/agregar', formData)
-      .then((response) => {
+      .then(response => {
         console.log('Usuario registrado exitosamente:', response.data);
         onClose();
       })
-      .catch((error) => {
+      .catch(error => {
         console.error('Error al crear el usuario:', error);
       });
   };
 
   return (
-    <>
-      <p>Falta información específica de Azure AD.</p>
-      <Input
-        disabled={true}
-        register={register}
-        errors={errors}
-        required
-        id="nombre"
-        label="Nombre"
-        value={formData.nombre} // Usa el valor almacenado en formData
-        onChange={handleChange}
-      />
-      <Input
-        disabled={true}
-        register={register}
-        errors={errors}
-        required
-        id="email"
-        label="Correo Electrónico"
-        type="email"
-        value={formData.email} // Usa el valor almacenado en formData
-        onChange={handleChange}
-      />
-
-      <Input
-        disabled={false}
-        register={register}
-        errors={errors}
-        required
-        id="contrasena"
-        label="Contraseña del Sitio"
-        type="password"
-        onChange={handleChange}
-      />
-      <Input
-        disabled={false}
-        register={register}
-        errors={errors}
-        required
-        id="telefono"
-        label="Teléfono"
-        onChange={handleChange}
-      />
-      <Input
-        disabled={false}
-        register={register}
-        errors={errors}
-        required
-        id="direccion"
-        label="Dirección"
-        onChange={handleChange}
-      />
-      <Input
-        disabled={false}
-        register={register}
-        errors={errors}
-        required
-        id="ciudad"
-        label="Ciudad"
-        onChange={handleChange}
-      />
-      <Input
-        disabled={false}
-        register={register}
-        errors={errors}
-        required
-        id="fechaNacimiento"
-        label="Fecha de Nacimiento"
-        type="date"
-        onChange={handleChange}
-      />
-      <Input
-        disabled={false}
-        register={register}
-        errors={errors}
-        required
-        id="ci"
-        label="Carnet de Identidad"
-        onChange={handleChange}
-      />
-      <Input
-        disabled={false}
-        register={register}
-        errors={errors}
-        required
-        id="fotoUrl"
-        label="Foto"
-        type="file"
-        onChange={handleChange}
-      />
-      <div className="flex justify-end">
-        {/* Renderiza un botón para enviar el formulario */}
-        <Boton onClick={handleSubmit} fullWidth>
-          Registrar
-        </Boton>
+    <div className="fixed inset-0 flex items-center justify-center z-10">
+      <div className="absolute inset-0 bg-black opacity-75" />
+      <div className="bg-white p-6 rounded-lg z-20">
+        <p>Falta información específica de Azure AD.</p>
+        <Input
+          disabled
+          register={register}
+          errors={errors}
+          required
+          id="nombre"
+          label="Nombre"
+          value={formData.nombre}
+          onChange={handleChange}
+        />
+        <Input
+          disabled
+          register={register}
+          errors={errors}
+          required
+          id="email"
+          label="Correo Electrónico"
+          type="email"
+          value={formData.email}
+          onChange={handleChange}
+        />
+        <Input
+          register={register}
+          errors={errors}
+          required
+          id="contrasena"
+          label="Contraseña del Sitio"
+          type="password"
+          value={formData.contrasena}
+          onChange={handleChange}
+        />
+        <Input
+          register={register}
+          errors={errors}
+          required
+          id="telefono"
+          label="Teléfono"
+          value={formData.telefono}
+          onChange={handleChange}
+        />
+        <Input
+          register={register}
+          errors={errors}
+          required
+          id="direccion"
+          label="Dirección"
+          value={formData.direccion}
+          onChange={handleChange}
+        />
+        <Input
+          register={register}
+          errors={errors}
+          required
+          id="ciudad"
+          label="Ciudad"
+          value={formData.ciudad}
+          onChange={handleChange}
+        />
+        <Input
+          register={register}
+          errors={errors}
+          required
+          id="fechaNacimiento"
+          label="Fecha de Nacimiento"
+          type="date"
+          value={formData.fechaNacimiento}
+          onChange={handleChange}
+        />
+        <Input
+          register={register}
+          errors={errors}
+          required
+          id="ci"
+          label="Carnet de Identidad"
+          value={formData.ci}
+          onChange={handleChange}
+        />
+        <Input
+          register={register}
+          errors={errors}
+          required
+          id="fotoUrl"
+          label="Foto"
+          type="file"
+          value={formData.fotoUrl}
+          onChange={handleChange}
+        />
+        <div className="flex justify-end">
+          <Boton onClick={handleSubmit} fullWidth>
+            Registrar
+          </Boton>
+        </div>
       </div>
-    </>
+    </div>
   );
 };
 
-// Exporta el componente AzureADModal
 export default AzureADModal;
+

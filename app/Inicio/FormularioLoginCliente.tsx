@@ -1,6 +1,5 @@
 'use client'
-// AuthForm.tsx
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import axios from 'axios';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
@@ -10,6 +9,7 @@ import Input from './componentes/Input';
 import Boton from '@/app/Inicio/componentes/Boton';
 import { toast } from 'react-hot-toast';
 import AzureADModal from './componentes/modalAzure-ad';
+import GoogleModal from './componentes/modalGoogle';
 
 type Variant = 'LOGIN' | 'REGISTER';
 
@@ -17,25 +17,18 @@ const AuthForm = () => {
   const session = useSession();
   const [variant, setVariant] = useState<Variant>('LOGIN');
   const [isLoading, setIsLoading] = useState(false);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedProvider, setSelectedProvider] = useState<string>('');
+  const [showModalMicrosoft, setShowModalMicrosoft] = useState(false);
+  const [showModalGoogle, setShowModalGoogle] = useState(false);
   const [fotoUrl, setFotoUrl] = useState<string>('');
 
-  const handleGoogleSignIn = async () => {
-    await signIn('google');
-    setSelectedProvider('google');
-  };
-  
-  const handleMicrosoftSignIn = async () => {
-    await signIn('azure-ad');
-  };
-  
-  useEffect(() => {
-    if (session?.status === 'authenticated') {
-      setShowModal(true);
+  const handleSignIn = async (provider: 'google' | 'azure-ad') => {
+    setIsLoading(true);
+    if (provider === 'google') {
+      await signIn(provider);
+    } else if (provider === 'azure-ad') {
+      await signIn(provider);
     }
-  }, [session]);
-  
+  };
 
   const {
     register,
@@ -43,8 +36,8 @@ const AuthForm = () => {
     formState: { errors },
   } = useForm<FieldValues>({
     defaultValues: {
-      nombre: session?.data?.user?.name || '',
-      email: session?.data?.user?.email || '',
+      nombre: '',
+      email: '',
       contrasena: '',
       telefono: '',
       direccion: '',
@@ -66,16 +59,15 @@ const AuthForm = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+  const onSubmit: SubmitHandler<FieldValues> = (data, event) => {
+    if (event) {
+      event.preventDefault();
+    }
     setIsLoading(true);
-
     if (variant === 'REGISTER') {
       axios
         .post('/api/agregar', { ...data, fotoUrl })
         .then((response) => {
-          return response.data;
-        })
-        .then((user) => {
           toast.success('Usuario registrado exitosamente');
         })
         .catch((error) => {
@@ -89,6 +81,16 @@ const AuthForm = () => {
   const toggleVariant = useCallback(() => {
     setVariant((prevVariant) => (prevVariant === 'LOGIN' ? 'REGISTER' : 'LOGIN'));
   }, []);
+
+  useEffect(() => {
+    if (session?.status === 'authenticated') {
+      if (session?.data?.user?.image === '') {
+        setShowModalMicrosoft(true);
+      } else {
+        setShowModalGoogle(true);
+      }
+    }
+  }, [session]);
 
   return (
     <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 border-2 bg-white border-black rounded-md">
@@ -143,7 +145,6 @@ const AuthForm = () => {
                 type="file"
                 onChange={handleFileChange}
               />
-
               <Input
                 disabled={false}
                 register={register}
@@ -172,6 +173,7 @@ const AuthForm = () => {
             label="Correo Electrónico"
             type="email"
           />
+          {/* Input para la contraseña */}
           <Input
             disabled={false}
             register={register}
@@ -181,10 +183,11 @@ const AuthForm = () => {
             label="Contraseña"
             type="password"
           />
+          {/* Botón de enviar (iniciar sesión o registrarse) */}
           <Boton fullWidth type="submit">
             {variant === 'LOGIN' ? 'Iniciar Sesión' : 'Registrarse'}
           </Boton>
-
+          {/* Enlace para alternar entre iniciar sesión y registrarse */}
           <div className="mt-6 flex justify-center">
             <div onClick={toggleVariant} className="cursor-pointer text-sm text-blue-500 hover:text-blue-700">
               {variant === 'LOGIN' ? '¿Necesitas una cuenta? Regístrate' : '¿Tienes una cuenta? Iniciar Sesión'}
@@ -192,6 +195,7 @@ const AuthForm = () => {
           </div>
         </form>
 
+        {/* Botones de inicio de sesión */}
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -202,35 +206,37 @@ const AuthForm = () => {
             </div>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">
+            {/* Botón de inicio de sesión con Google */}
             <div>
-              <GoogleButton onClick={handleGoogleSignIn} />
+              <GoogleButton onClick={() => handleSignIn('google')} />
             </div>
+            {/* Botón de inicio de sesión con Microsoft */}
             <div>
-              <MicrosoftButton onClick={handleMicrosoftSignIn} />
+              <MicrosoftButton onClick={() => handleSignIn('azure-ad')} />
             </div>
           </div>
         </div>
 
-        {showModal && (
-          <div className="fixed inset-0 flex items-center justify-center z-10">
-            <div className="absolute inset-0 bg-black opacity-75" onClick={() => setShowModal(false)} />
-            <div className="bg-white p-6 rounded-lg z-20">
-              {/* Renderiza el modal específico según el proveedor seleccionado */}
-              {session && session.status === 'authenticated' && (
-                <AzureADModal
-                  register={register}
-                  errors={errors}
-                  onClose={() => setShowModal(false)} // Pasar la función para cerrar el modal
-                />
-              )}
-            </div>
-          </div>
+        {/* Modales */}
+        {/* Modal de Google */}
+        {showModalGoogle && (
+          <GoogleModal
+            register={register}
+            errors={errors}
+            onClose={() => setShowModalGoogle(false)}
+          />
+        )}
+        {/* Modal de Microsoft */}
+        {showModalMicrosoft && (
+          <AzureADModal
+            register={register}
+            errors={errors}
+            onClose={() => setShowModalMicrosoft(false)}
+          />
         )}
       </div>
-
     </div>
   );
 };
 
 export default AuthForm;
-
