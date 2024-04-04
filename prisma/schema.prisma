@@ -1,0 +1,36 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("NEXT_PUBLIC_SUPABASE_URL")
+}
+
+model usuario {
+  id                Int       @id @default(autoincrement())
+  nombre            String
+  email             String    @unique
+  contrasena        String
+  telefono          String    @unique // Considera si necesitas esta restricción basado en tu caso de uso
+  direccion         String
+  ciudad            String
+  fotoUrl           String
+  fechaNacimiento   String?
+  fechaDeRegistro   DateTime  @default(now())
+  ci                String    @unique
+  rol               UserRole  @default(USUARIO)
+}
+
+enum UserRole {
+  ADMIN
+  PROPIETARIO
+  USUARIO
+  BANEADO
+}

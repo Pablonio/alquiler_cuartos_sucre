@@ -1,54 +1,105 @@
 'use client'
-import React, { useEffect, useState } from 'react';
-import { signIn, useSession } from 'next-auth/react';
-import { useForm } from 'react-hook-form';
-
-import Input from '@/app/Inicio/componentes/Input';
+// AuthForm.tsx
+import React, { useCallback, useEffect, useState } from 'react';
+import { useSession, signIn } from 'next-auth/react';
+import axios from 'axios';
+import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
+import GoogleButton from './componentes/GoogleButton';
+import MicrosoftButton from './componentes/MicrosoftButton';
+import Input from './componentes/Input';
 import Boton from '@/app/Inicio/componentes/Boton';
-import GoogleButton from '@/app/Inicio/componentes/GoogleButton';
-import MicrosoftButton from '@/app/Inicio/componentes/MicrosoftButton';
+import { toast } from 'react-hot-toast';
+import AzureADModal from './componentes/modalAzure-ad';
 
-type Variante = 'INICIO_SESION' | 'REGISTRAR';
+type Variant = 'LOGIN' | 'REGISTER';
 
-export interface DatosFormulario {
-  nombre: string;
-  correo: string;
-  contraseña: string;
-  telefono: string;
-  direccion: string;
-  ciudad: string;
-  foto: string; // Cambiado a string
-  fechaNacimiento: string;
-  ci: string;
-}
+const AuthForm = () => {
+  const session = useSession();
+  const [variant, setVariant] = useState<Variant>('LOGIN');
+  const [isLoading, setIsLoading] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [selectedProvider, setSelectedProvider] = useState<string>('');
+  const [fotoUrl, setFotoUrl] = useState<string>('');
 
-const Formulario = () => {
-  const { status } = useSession();
-  const [variante, setVariante] = useState<Variante>('INICIO_SESION');
-  const [datosAdicionalesRequeridos, setDatosAdicionalesRequeridos] = useState<boolean>(true);
-  const { register, handleSubmit, formState: { errors } } = useForm<DatosFormulario>({
-    defaultValues: {
-      correo: '',
-      contraseña: '',
+  const handleGoogleSignIn = async () => {
+    await signIn('google');
+    setSelectedProvider('google');
+  };
+  
+  const handleMicrosoftSignIn = async () => {
+    await signIn('azure-ad');
+  };
+  
+  useEffect(() => {
+    if (session?.status === 'authenticated') {
+      setShowModal(true);
     }
+  }, [session]);
+  
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<FieldValues>({
+    defaultValues: {
+      nombre: session?.data?.user?.name || '',
+      email: session?.data?.user?.email || '',
+      contrasena: '',
+      telefono: '',
+      direccion: '',
+      ciudad: '',
+      fechaNacimiento: '',
+      ci: '',
+    },
   });
 
-  useEffect(() => {
-    if (status === 'authenticated' && variante === 'REGISTRAR') {
-      setDatosAdicionalesRequeridos(true);
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFotoUrl(reader.result as string);
+      };
+      reader.readAsDataURL(file);
     }
-  }, [status, variante]);
-  
+  };
+
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    setIsLoading(true);
+
+    if (variant === 'REGISTER') {
+      axios
+        .post('/api/agregar', { ...data, fotoUrl })
+        .then((response) => {
+          return response.data;
+        })
+        .then((user) => {
+          toast.success('Usuario registrado exitosamente');
+        })
+        .catch((error) => {
+          console.error('Error creating user:', error);
+          toast.error('Something went wrong!');
+        })
+        .finally(() => setIsLoading(false));
+    }
+  };
+
+  const toggleVariant = useCallback(() => {
+    setVariant((prevVariant) => (prevVariant === 'LOGIN' ? 'REGISTER' : 'LOGIN'));
+  }, []);
+
   return (
     <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 border-2 bg-white border-black rounded-md">
       <div className="max-w-md w-full space-y-8">
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {variante === 'INICIO_SESION' ? 'Inicia Sesión' : 'Regístrate'}
+            {variant === 'LOGIN' ? 'Inicia Sesión' : 'Regístrate'}
           </h2>
         </div>
-        <form className="mt-8 space-y-6" action="/api/registrar" method="post">
-          {variante === 'REGISTRAR' && datosAdicionalesRequeridos && (
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
+          {variant === 'REGISTER' && (
             <>
               <Input
                 disabled={false}
@@ -82,11 +133,17 @@ const Formulario = () => {
                 id="ciudad"
                 label="Ciudad"
               />
-              <input
+              <Input
                 disabled={false}
-                {...register("foto")} // Cambiado aquí
+                register={register}
+                errors={errors}
+                required
+                id="fotoUrl"
+                label="Foto"
                 type="file"
+                onChange={handleFileChange}
               />
+
               <Input
                 disabled={false}
                 register={register}
@@ -94,7 +151,7 @@ const Formulario = () => {
                 required
                 id="fechaNacimiento"
                 label="Fecha de Nacimiento"
-                type='date'
+                type="date"
               />
               <Input
                 disabled={false}
@@ -111,7 +168,7 @@ const Formulario = () => {
             register={register}
             errors={errors}
             required
-            id="correo"
+            id="email"
             label="Correo Electrónico"
             type="email"
           />
@@ -120,17 +177,17 @@ const Formulario = () => {
             register={register}
             errors={errors}
             required
-            id="contraseña"
+            id="contrasena"
             label="Contraseña"
             type="password"
           />
-          <Boton fullWidth type="submit" >
-            {variante === 'INICIO_SESION' ? 'Iniciar Sesión' : 'Registrarse'}
+          <Boton fullWidth type="submit">
+            {variant === 'LOGIN' ? 'Iniciar Sesión' : 'Registrarse'}
           </Boton>
 
           <div className="mt-6 flex justify-center">
-            <div onClick={() => setVariante(variante === 'INICIO_SESION' ? 'REGISTRAR' : 'INICIO_SESION')} className="cursor-pointer text-sm text-blue-500 hover:text-blue-700">
-              {variante === 'INICIO_SESION' ? '¿Necesitas una cuenta? Regístrate' : '¿Tienes una cuenta? Iniciar Sesión'}
+            <div onClick={toggleVariant} className="cursor-pointer text-sm text-blue-500 hover:text-blue-700">
+              {variant === 'LOGIN' ? '¿Necesitas una cuenta? Regístrate' : '¿Tienes una cuenta? Iniciar Sesión'}
             </div>
           </div>
         </form>
@@ -146,16 +203,34 @@ const Formulario = () => {
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">
             <div>
-              <GoogleButton onClick={() => signIn('google')} />
+              <GoogleButton onClick={handleGoogleSignIn} />
             </div>
             <div>
-              <MicrosoftButton onClick={() => signIn('azure-ad')} />
+              <MicrosoftButton onClick={handleMicrosoftSignIn} />
             </div>
           </div>
         </div>
+
+        {showModal && (
+          <div className="fixed inset-0 flex items-center justify-center z-10">
+            <div className="absolute inset-0 bg-black opacity-75" onClick={() => setShowModal(false)} />
+            <div className="bg-white p-6 rounded-lg z-20">
+              {/* Renderiza el modal específico según el proveedor seleccionado */}
+              {session && session.status === 'authenticated' && (
+                <AzureADModal
+                  register={register}
+                  errors={errors}
+                  onClose={() => setShowModal(false)} // Pasar la función para cerrar el modal
+                />
+              )}
+            </div>
+          </div>
+        )}
       </div>
+
     </div>
   );
 };
 
-export default Formulario;
+export default AuthForm;
+
