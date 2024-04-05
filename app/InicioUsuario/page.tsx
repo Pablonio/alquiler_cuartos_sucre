@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Card from "./cardCuartos/cardCuartos";
-import Mapa from "./cardCuartos/Mapa"
 
 
 interface Cuarto {
@@ -45,7 +44,6 @@ const ClientePage = () => {
   return (
     <div className="app">
       <h1>Cuartos</h1> {/* Título de la lista de cuartos */}
-      <Mapa></Mapa>
       <p>Conoce tu ubicación</p> {/* Texto sobre el mapa */}
       <div className="card-container">
         {cuartos.map((cuarto) => (
