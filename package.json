@@ -15,6 +15,7 @@
     "@supabase/supabase-js": "^2.41.1",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
+    "leaflet": "^1.9.4",
     "next": "14.1.4",
     "next-auth": "^4.22.1",
     "nextjs-cors": "^2.2.0",
@@ -26,6 +27,7 @@
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
+    "@types/leaflet": "^1.9.9",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

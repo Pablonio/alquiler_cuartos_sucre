@@ -12,7 +12,6 @@ datasource db {
   provider = "postgresql"
   url      = env("NEXT_PUBLIC_SUPABASE_URL")
 }
-
 model usuario {
   id                Int       @id @default(autoincrement())
   nombre            String
@@ -28,12 +27,14 @@ model usuario {
   rol               UserRole  @default(USUARIO)
   cuartos           cuarto[]  // Relación uno a muchos con Cuarto
   comentarios       comentario[] // Relación uno a muchos con Comentario
+  mensajesEnviados  mensaje[]   @relation("MensajesEnviados")
+  mensajesRecibidos mensaje[]   @relation("MensajesRecibidos")
 }
 
 model cuarto {
   id                Int       @id @default(autoincrement())
   direccion         String
-  fotoUrlcuarto           String
+  fotoUrlcuarto     String
   precio            Decimal
   caracteristicas   String
   tipo              TipoCuarto // Enum definido más abajo
@@ -45,15 +46,26 @@ model cuarto {
 }
 
 model comentario {
-  id                Int       @id @default(autoincrement())
-  contenido         String
+  id                          Int       @id @default(autoincrement())
+  contenido                   String
   fechaDeRegistroComentario   DateTime  @default(now())
-  usuario           usuario    @relation(fields: [usuarioId], references: [id])
-  usuarioId         Int
-  cuarto            cuarto     @relation(fields: [cuartoId], references: [id])
-  cuartoId          Int
-  calificacion      Int        // Puntuación del comentario
+  usuario                     usuario   @relation(fields: [usuarioId], references: [id])
+  usuarioId                   Int
+  cuarto                      cuarto    @relation(fields: [cuartoId], references: [id])
+  cuartoId                    Int
+  calificacion                Int       // Puntuación del comentario
 }
+
+model mensaje {
+  id               Int       @id @default(autoincrement())
+  contenido        String
+  fechaEnvio       DateTime  @default(now())
+  emisor           usuario   @relation("MensajesEnviados", fields: [idEmisor], references: [id])
+  idEmisor         Int
+  receptor         usuario   @relation("MensajesRecibidos", fields: [idReceptor], references: [id])
+  idReceptor       Int
+}
+
 
 enum UserRole {
   ADMIN
