@@ -2,7 +2,7 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useSession } from "next-auth/react";
 import axios from "axios";
-import AuthForm from "../Inicio/page";
+import AuthForm from "../(site)/page";
 import CommentCard from "./componente/cardComentario";
 
 interface Comment {
