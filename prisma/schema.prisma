@@ -17,7 +17,7 @@ model usuario {
   nombre            String
   email             String    @unique
   contrasena        String
-  telefono          String    @unique
+  telefono          String    @unique // Considera si necesitas esta restricción basado en tu caso de uso
   direccion         String
   ciudad            String
   fotoUrl           String
@@ -26,7 +26,7 @@ model usuario {
   ci                String    @unique
   rol               UserRole  @default(USUARIO)
   cuartos           cuarto[]  // Relación uno a muchos con Cuarto
-  comentarios       comentario[] // Relación uno a muchos con Comentario
+  comentarios       comentario[]
   mensajesEnviados  mensaje[]   @relation("MensajesEnviados")
   mensajesRecibidos mensaje[]   @relation("MensajesRecibidos")
 }

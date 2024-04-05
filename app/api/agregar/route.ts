@@ -17,7 +17,8 @@ export async function POST(
     ci
   } = body;
 
-  const user = await db.usuario.create({
+  // Otherwise, create a new user
+  const newUser = await db.usuario.create({
     data: {
       email,
       nombre,
@@ -31,5 +32,5 @@ export async function POST(
     }
   });
 
-  return NextResponse.json(user);
+  return NextResponse.json(newUser);
 }
