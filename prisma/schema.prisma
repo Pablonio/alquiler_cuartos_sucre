@@ -18,7 +18,7 @@ model usuario {
   nombre            String
   email             String    @unique
   contrasena        String
-  telefono          String    @unique // Considera si necesitas esta restricción basado en tu caso de uso
+  telefono          String    @unique
   direccion         String
   ciudad            String
   fotoUrl           String
@@ -26,11 +26,52 @@ model usuario {
   fechaDeRegistro   DateTime  @default(now())
   ci                String    @unique
   rol               UserRole  @default(USUARIO)
+  cuartos           cuarto[]  // Relación uno a muchos con Cuarto
+  comentarios       comentario[] // Relación uno a muchos con Comentario
+}
+
+model cuarto {
+  id                Int       @id @default(autoincrement())
+  direccion         String
+  fotoUrlcuarto           String
+  precio            Decimal
+  caracteristicas   String
+  tipo              TipoCuarto // Enum definido más abajo
+  cantidadHabitaciones Decimal
+  estado            EstadoCuarto // Enum definido más abajo
+  propietario       usuario    @relation(fields: [propietarioId], references: [id])
+  propietarioId     Int
+  comentarios       comentario[] // Relación uno a muchos con Comentario
+}
+
+model comentario {
+  id                Int       @id @default(autoincrement())
+  contenido         String
+  fechaDeRegistroComentario   DateTime  @default(now())
+  usuario           usuario    @relation(fields: [usuarioId], references: [id])
+  usuarioId         Int
+  cuarto            cuarto     @relation(fields: [cuartoId], references: [id])
+  cuartoId          Int
+  calificacion      Int        // Puntuación del comentario
 }
 
 enum UserRole {
   ADMIN
   PROPIETARIO
   USUARIO
+  ANONIMO
   BANEADO
 }
+
+enum TipoCuarto {
+  GARZONIER
+  
+}
+
+enum EstadoCuarto {
+  DESOCUPADO
+  EN_CONTRATO
+  ALQUILADO
+}
+
+

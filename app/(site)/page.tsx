@@ -1,21 +1,20 @@
 'use client'
 import { useRouter } from "next/navigation";
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useSession, signIn } from 'next-auth/react';
 import axios from 'axios';
 import { FieldValues, SubmitHandler, useForm } from 'react-hook-form';
 import GoogleButton from './componentes/GoogleButton';
 import MicrosoftButton from './componentes/MicrosoftButton';
 import Input from './componentes/Input';
-import Boton from '@/app/Inicio/componentes/Boton';
+import Boton from '@/app/(site)/componentes/Boton';
 import { toast } from 'react-hot-toast';
 import AzureADModal from './componentes/modalAzure-ad';
 import GoogleModal from './componentes/modalGoogle';
 
-
 type Variant = 'LOGIN' | 'REGISTER';
 
-const AuthForm = () => {
+const Home = () => {
   const session = useSession();
   const [variant, setVariant] = useState<Variant>('LOGIN');
   const [isLoading, setIsLoading] = useState(false);
@@ -79,20 +78,22 @@ const AuthForm = () => {
         })
         .finally(() => setIsLoading(false));
     } else {
-      // Iniciar sesión
       axios
         .post('/api/inicio', { email: data.email, contrasena: data.contrasena })
         .then((response) => {
           const rol = response.data.rol;
           switch (rol) {
             case 'USUARIO':
-              router.push('/InicioUsuario')
+              router.push('/InicioUsuario');
               break;
             case 'PROPIETARIO':
               router.push('/InicioPropietario');
               break;
             case 'ADMIN':
               router.push('/InicioAdmin');
+              break;
+            case 'ANONIMO':
+              router.push('/InicioUsuario');
               break;
             case 'BANEADO':
               router.push('/InicioBaneado');
@@ -110,10 +111,9 @@ const AuthForm = () => {
     }
   };
 
-  const toggleVariant = useCallback(() => {
+  const toggleVariant = () => {
     setVariant((prevVariant) => (prevVariant === 'LOGIN' ? 'REGISTER' : 'LOGIN'));
-  }, []);
-
+  };
 
   const verifyUserExists = async () => {
     try {
@@ -128,6 +128,9 @@ const AuthForm = () => {
           break;
         case 'ADMIN':
           router.push('/InicioAdmin');
+          break;
+        case 'ANONIMO':
+          router.push('/InicioUsuario');
           break;
         case 'BANEADO':
           router.push('/InicioBaneado');
@@ -155,17 +158,37 @@ const AuthForm = () => {
     }
   }, [session]);
 
+  const handleAnonymousLogin = () => {
+    axios
+      .post('/api/inicio', { email: '', contrasena: '' })
+      .then((response) => {
+        const rol = response.data.rol;
+        if (rol === 'ANONIMO') {
+          router.push('/InicioUsuario');
+        } else {
+          // Manejar otros roles si es necesario
+        }
+      })
+      .catch((error) => {
+        console.error('Error logging in:', error);
+        toast.error('Something went wrong!');
+      });
+  };
+
   return (
-    <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 border-2 bg-white border-black rounded-md">
+    <div className="flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 border-2 bg-white dark:bg-gray-800 border-black dark:border-gray-700 rounded-md">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            {variant === 'LOGIN' ? 'Inicia Sesión' : 'Regístrate'}
+          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900 dark:text-gray-100">
+            {variant === 'LOGIN' ? 'Inicia Sesión' : 'Regístrate'} {/** Añadir la letra al lado del enlace */}
+            {variant === 'REGISTER' && <span className="text-xs"> (A)</span>}
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           {variant === 'REGISTER' && (
             <>
+              {/* Campos de registro */}
+              {/* Input para Nombre */}
               <Input
                 disabled={false}
                 register={register}
@@ -236,7 +259,7 @@ const AuthForm = () => {
             label="Correo Electrónico"
             type="email"
           />
-          {/* Input para la contraseña */}
+          {/* Campo de contraseña */}
           <Input
             disabled={false}
             register={register}
@@ -255,6 +278,10 @@ const AuthForm = () => {
             <div onClick={toggleVariant} className="cursor-pointer text-sm text-blue-500 hover:text-blue-700">
               {variant === 'LOGIN' ? '¿Necesitas una cuenta? Regístrate' : '¿Tienes una cuenta? Iniciar Sesión'}
             </div>
+            {/** Agregar el enlace para entrar como anónimo */}
+            <div onClick={handleAnonymousLogin} className="cursor-pointer text-sm text-blue-500 hover:text-blue-700 ml-2">
+              Entrar como Anónimo
+            </div>
           </div>
         </form>
 
@@ -262,10 +289,10 @@ const AuthForm = () => {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-300" />
+              <div className="w-full border-t border-gray-300 dark:border-gray-600" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="bg-white px-2 text-gray-500">Iniciar Sesión con</span>
+              <span className="bg-white dark:bg-gray-700 px-2 text-gray-500 dark:text-gray-300">Iniciar Sesión con</span>
             </div>
           </div>
           <div className="mt-6 grid grid-cols-2 gap-3">
@@ -302,4 +329,4 @@ const AuthForm = () => {
   );
 };
 
-export default AuthForm;
+export default Home;
