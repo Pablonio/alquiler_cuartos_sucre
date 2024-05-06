@@ -57,53 +57,51 @@ const AuthForm = () => {
     }
   };
 
-  const onSubmit: SubmitHandler<FieldValues> = (data, event) => {
-    if (event) {
-      event.preventDefault();
-    }
-    setIsLoading(true);
-    if (variant === 'LOGIN') {
-      axios
-        .post('/api/inicio', { email: data.email, contrasena: data.contrasena })
-        .then((response) => {
-          const rol = response.data.rol;
-          switch (rol) {
-            case 'USUARIO':
-              router.push('/InicioUsuario');
-              break;
-            case 'PROPIETARIO':
-              router.push('/InicioPropietario');
-              break;
-            case 'ADMIN':
-              router.push('/InicioAdmin');
-              break;
-            case 'BANEADO':
-              router.push('/InicioBaneado');
-              break;
-            default:
-              router.push('/');
-              break;
-          }
-        })
-        .catch((error) => {
-          console.error('Error logging in:', error);
-          toast.error('Something went wrong!');
-        })
-        .finally(() => setIsLoading(false));
-    } else {
-      axios
-        .post('/api/agregar', { ...data, fotoUrl })
-        .then((response) => {
-          toast.success('Usuario registrado exitosamente');
-          router.push('/');
-        })
-        .catch((error) => {
-          console.error('Error creating user:', error);
-          toast.error('Something went wrong!');
-        })
-        .finally(() => setIsLoading(false));
+  const onSubmit: SubmitHandler<FieldValues> = async (data, event) => {
+    try {
+      if (event) {
+        event.preventDefault();
+      }
+      setIsLoading(true);
+  
+      let response;
+      if (variant === 'LOGIN') {
+        response = await axios.post('/api/inicio', { email: data.email, contrasena: data.contrasena });
+      } else {
+        response = await axios.post('/api/agregar', { ...data, fotoUrl });
+      }
+  
+      if (variant === 'LOGIN') {
+        const rol = response.data.rol;
+        switch (rol) {
+          case 'USUARIO':
+            router.push('/InicioUsuario');
+            break;
+          case 'PROPIETARIO':
+            router.push('/InicioPropietario');
+            break;
+          case 'ADMIN':
+            router.push('/InicioAdmin');
+            break;
+          case 'BANEADO':
+            router.push('/InicioBaneado');
+            break;
+          default:
+            router.push('/');
+            break;
+        }
+      } else {
+        toast.success('Usuario registrado exitosamente');
+        router.push('/');
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Something went wrong!');
+    } finally {
+      setIsLoading(false);
     }
   };
+  
 
   useEffect(() => {
     if (session?.status === 'authenticated') {
