@@ -20,6 +20,7 @@ function AboutRoom() {
   const [comments, setComments] = useState<Comment[]>([]);
   const session = useSession();
   const [selectedRoom, setSelectedRoom] = useState<any>(null);
+  const [darkMode, setDarkMode] = useState<boolean>(false);
 
   useEffect(() => {
     const selectedRoomString = localStorage.getItem("selectedRoom");
@@ -83,7 +84,7 @@ function AboutRoom() {
   }
 
   return (
-    <div className="container mx-auto">
+    <div className={`container mx-auto ${darkMode ? 'dark' : 'light'}`}>
       <h1 className="text-3xl font-bold mt-8 mb-4">Detalles del Cuarto</h1>
       <div className="flex flex-wrap items-start">
         <div className="w-full md:w-1/2 lg:w-2/3 xl:w-3/4">

@@ -1,9 +1,7 @@
 'use client'
-
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Card from "./cardCuartos/cardCuartos";
-
 
 interface Cuarto {
   id: number;
@@ -19,8 +17,9 @@ interface Cuarto {
   };
 }
 
-const ClientePage = () => {
+const AboutRoom = () => {
   const [cuartos, setCuartos] = useState<Cuarto[]>([]);
+  const [darkMode, setDarkMode] = useState(false); // Estado para el modo oscuro
   const router = useRouter();
 
   useEffect(() => {
@@ -41,10 +40,29 @@ const ClientePage = () => {
     router.push(`/AboutRoom/${id}`);
   };
 
+  useEffect(() => {
+    // Aplicar cambios globales de estilos en función del modo oscuro
+    const body = document.body;
+    if (darkMode) {
+      body.classList.add('dark');
+    } else {
+      body.classList.remove('dark');
+    }
+  }, [darkMode]);
+
   return (
-    <div className="app">
-      <h1>Cuartos</h1> {/* Título de la lista de cuartos */}
-      <p>Conoce tu ubicación</p> {/* Texto sobre el mapa */}
+    <div className={`app ${darkMode ? 'dark' : 'light'}`}>
+      <div className="header">
+        <h1 className="text-4xl font-bold mb-4">Detalles del Cuarto</h1>
+        <button 
+          className={`ml-auto px-2 py-1 rounded-lg ${darkMode ? 'bg-gray-800 text-white' : 'bg-gray-200 text-gray-800'} focus:outline-none`}
+          onClick={() => setDarkMode(!darkMode)}
+        >
+          {darkMode ? 'Modo Claro' : 'Modo Oscuro'}
+        </button>
+      </div>
+      <p>Conoce tu ubicación</p>
+      
       <div className="card-container">
         {cuartos.map((cuarto) => (
           <Card key={cuarto.id} cuarto={cuarto} />
@@ -56,6 +74,17 @@ const ClientePage = () => {
           display: flex;
           flex-direction: column;
           align-items: center;
+          min-height: 100vh;
+          transition: background-color 0.3s ease;
+        }
+
+        .header {
+          width: 100%;
+          display: flex;
+          align-items: center;
+          padding: 20px;
+          background-color: ${darkMode ? '#333' : '#f0f0f0'};
+          box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .card-container {
@@ -72,9 +101,19 @@ const ClientePage = () => {
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
           }
         }
+
+        .light {
+          background-color: #ffffff;
+          color: #333;
+        }
+
+        .dark {
+          background-color: #121212;
+          color: #ffffff;
+        }
       `}</style>
     </div>
   );
 };
 
-export default ClientePage;
+export default AboutRoom;

@@ -14,6 +14,7 @@ const Home = () => {
     tipo: 'GARZONIER',
     cantidadHabitaciones: '',
     estado: 'DESOCUPADO',
+    email: session?.user?.email
   });
 
   // Estado para la URL de la imagen
@@ -41,15 +42,13 @@ const Home = () => {
     }
   };
 
-  // Manejar envío del formulario
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
       // Realizar la solicitud POST para crear el cuarto
       const response = await axios.post('/api/cuartos', {
         ...formData,
-        email: session?.user?.email,
-        fotoUrlcuarto: fotoUrlcuarto // Agregar la URL de la imagen
+        fotoUrlcuarto: fotoUrlcuarto
       });
       setFotoUrl(''); // Limpiar la URL de la imagen después de enviar el formulario
     } catch (error) {
@@ -57,6 +56,8 @@ const Home = () => {
       // Aquí podrías manejar el error de alguna manera, como mostrar un mensaje de error al usuario
     }
   };
+  
+  
 
   // Renderiza el formulario
   return (

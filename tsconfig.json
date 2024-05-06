@@ -21,6 +21,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/contexto/ContextoDeInicio.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/contexto/ContextoDeInicio.tsx", "app/InicioUsuario/Mapa/Mapa.jsx"],
   "exclude": ["node_modules"]
 }

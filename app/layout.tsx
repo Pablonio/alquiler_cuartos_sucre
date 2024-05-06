@@ -21,7 +21,7 @@ export default function RootLayout({
       <head>
         <Script src="https://www.google.com/recaptcha/api.js?render=6LdYhqcpAAAAAID55_bHoE0R8pTRHF1acH2yA4KM"/>
       </head>
-      <body className={inter.className}>
+      <body  className={inter.className}>
         <AuthContext>
           {children}  
         </AuthContext>

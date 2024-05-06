@@ -16,6 +16,7 @@
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "leaflet": "^1.9.4",
+    "leaflet-defaulticon-compatibility": "^0.1.2",
     "next": "14.1.4",
     "next-auth": "^4.22.1",
     "nextjs-cors": "^2.2.0",
@@ -23,7 +24,8 @@
     "react-dom": "^18",
     "react-hook-form": "^7.51.1",
     "react-hot-toast": "^2.4.1",
-    "react-icons": "^5.0.1"
+    "react-icons": "^5.0.1",
+    "react-leaflet": "^4.2.1"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
